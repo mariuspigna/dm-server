@@ -6,10 +6,13 @@ const session      = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 
 app.disable("x-powered-by");
-const store = new MongoDBStore({
+app.dbStore = () => {
+  return new MongoDBStore({
     uri: process.env.DB_CONNECTION,
-    collection: "session",
-  });
+    collection: "session",})
+} 
+
+console.log(app.dbStore().options.collection)
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -21,9 +24,9 @@ app.use(
       secret: "secret",
       resave: false,
       saveUninitialized: false,
-      store: store,
+      store: app.dbStore(),
     })
   );
-  
+
 app.use(express.json());
 module.exports = app;
